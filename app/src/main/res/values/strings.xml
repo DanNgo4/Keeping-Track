@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">KeepingTrack</string>
+
+    <string name="movie_id">1.</string>
+    <string name="movie_name">The Gentlemen</string>
+    <string name="movie_year">(2019)</string>
+    <string name="genre">Genre:</string>
+    <string name="movie_genre">Action</string>
+    <string name="director">Director:</string>
+    <string name="movie_director">Guy Ritchie</string>
+    <string name="rating">Rating:</string>
+    <string name="movie_rating">7.8</string>
+    <string name="notes">Notes:</string>
+    <string name="movie_notes">None</string>
+
+    <string name="genre_none">Unknown</string>
+    <string name="genre_romance">Romance</string>
+    <string name="genre_drama">Drama</string>
+    <string name="genre_action">Action</string>
+    <string name="genre_horror">Horror</string>
+    <string name="genre_scifi">Science Fiction</string>
+    <string name="genre_comedy">Comedy</string>
+    <string name="genre_animation">Animation</string>
 </resources>

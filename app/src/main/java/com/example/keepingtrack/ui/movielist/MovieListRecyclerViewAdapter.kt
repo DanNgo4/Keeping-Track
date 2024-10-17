@@ -10,7 +10,7 @@ import com.example.keepingtrack.databinding.FragmentMovieItemBinding
 
 class MovieListRecyclerViewAdapter(
     private val values: List<Movie>,
-//    private val listener: (Movie) -> Unit
+    private val listener: (Movie) -> Unit
 ) : RecyclerView.Adapter<MovieListRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -39,11 +39,10 @@ class MovieListRecyclerViewAdapter(
                 binding.movieDirector.text = movie.director
                 binding.movieRating.text = movie.rating.toString()
                 binding.movieNotes.text = movie.notes ?: "None"
-//                binding.movieYear.text = movie.year.toString()
-//                binding.movieRating.text = movie.rating.toString()
-//                binding.movieGenre.text = movie.genre.toString()
-//                binding.movieDirector.text = movie.director
-//                binding.movieNotes.text = movie.notes
+
+                binding.button.setOnClickListener{
+                    listener(movie)
+                }
             }
         }
     }

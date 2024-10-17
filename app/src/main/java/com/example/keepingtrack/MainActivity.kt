@@ -21,16 +21,11 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val movies = initValues()
-        val fragment = MovieListFragment.newInstance(movies)
 
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.fragmentContainerView, fragment)
-        fragmentTransaction.commit()
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragmentContainerView, fragment)
-//            .commit()
+        val fragment = MovieListFragment.newInstance(initValues())
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, fragment)
+            .commit()
     }
 
     private fun initValues(): List<Movie> {

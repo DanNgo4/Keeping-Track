@@ -7,12 +7,28 @@
     tools:context=".ui.moviedetail.MovieDetailFragment">
 
     <ImageButton
+        android:id="@+id/backBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
         android:id="@+id/editMovieBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_edit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/deleteBtn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_delete"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout3"
@@ -123,16 +139,12 @@
             android:layout_weight="1"
             android:text="@string/edit_genre" />
 
-        <EditText
+        <TextView
             android:id="@+id/editMovieGenre"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@null"
-            android:enabled="false"
-            android:text="@string/edit_movie_genre"
-            android:textColor="@android:color/black"
-            android:textSize="14sp" />
+            android:text="@string/edit_movie_genre" />
     </LinearLayout>
 
     <RatingBar

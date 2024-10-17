@@ -12,12 +12,18 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.keepingtrack.R
 import com.example.keepingtrack.data.Movie
+import com.example.keepingtrack.`object`.Constant
 import com.example.keepingtrack.ui.moviedetail.MovieDetailFragment
+import com.google.firebase.Firebase
+import com.google.firebase.database.database
 import java.io.Serializable
 
 class MovieListFragment() : Fragment() {
     private lateinit var values: List<Movie>
+    private lateinit var recyclerView: RecyclerView
     private var columnCount = 1
+    private val database = Firebase.database
+    private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +31,6 @@ class MovieListFragment() : Fragment() {
             columnCount = it.getInt(ARG_COLUMN_COUNT, 1)
             values = it.getSerializable(ARG_MOVIE_LIST) as List<Movie>
         } ?: run {
-            // Handle the case where no arguments were provided
             values = emptyList()
         }
     }
@@ -38,7 +43,7 @@ class MovieListFragment() : Fragment() {
         val view = inflater.inflate(R.layout.fragment_movie_list, container, false)
 
         // Find the RecyclerView by ID
-        val recyclerView: RecyclerView = view.findViewById(R.id.recycler_view)
+        recyclerView = view.findViewById(R.id.recycler_view)
 
         // Set the adapter
         with(recyclerView) {
@@ -48,9 +53,16 @@ class MovieListFragment() : Fragment() {
             }
 
             // Pass a lambda function as the listener for movie clicks
-            adapter = MovieListRecyclerViewAdapter(values) { movie ->
-                showDetail(movie) // Define showDetail in this Fragment
-            }
+            adapter = MovieListRecyclerViewAdapter(
+                values,
+
+                {
+                    movie -> showDetail(movie)
+                },
+
+                {
+                    movie -> deleteMovie(movie)
+                })
         }
 
         return view
@@ -58,12 +70,27 @@ class MovieListFragment() : Fragment() {
 
     private fun showDetail(movie: Movie) {
         val fragment = MovieDetailFragment.newInstance(movie)
-        val fragmentManager = requireActivity().supportFragmentManager
 
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.fragmentContainerView, fragment)
-        fragmentTransaction.addToBackStack(null)
-        fragmentTransaction.commit()
+        requireActivity().supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragmentContainerView, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun deleteMovie(movie: Movie) {
+        val movieId = movie.id.toString()
+
+        // Remove the movie from Firebase
+        movieRef.child(movieId)
+            .removeValue()
+            .addOnSuccessListener { // Remove the movie from the UI (RecyclerView)
+                val position = values.indexOf(movie)
+                if (position >= 0) {
+                    (values as MutableList).removeAt(position)
+                    recyclerView.adapter?.notifyItemRemoved(position)
+                }
+            }
     }
 
     companion object {

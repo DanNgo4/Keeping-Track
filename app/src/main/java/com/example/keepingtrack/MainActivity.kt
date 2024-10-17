@@ -9,9 +9,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.enum.Genre
+import com.example.keepingtrack.`object`.Constant
 import com.example.keepingtrack.ui.movielist.MovieListFragment
+import com.google.firebase.Firebase
+import com.google.firebase.database.database
 
 class MainActivity : AppCompatActivity() {
+    private val database = Firebase.database
+    private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -22,7 +28,11 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val fragment = MovieListFragment.newInstance(initValues())
+        // Initialise values and write to Firebase
+        val movies = initValues()
+        writeMoviesToFirebase(movies)
+
+        val fragment = MovieListFragment.newInstance(movies)
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainerView, fragment)
             .commit()
@@ -50,7 +60,13 @@ class MainActivity : AppCompatActivity() {
         movies.add(Movie(17, "The Notebook", 2004, "Nick Cassavetes", 7.8f, Genre.ROMANCE, "A classic love story"))
         movies.add(Movie(18, "Edge of Tomorrow", 2014, "Doug Liman", 7.9f, Genre.ACTION, "A soldier relives a day in an alien war"))
 
-        Log.d("MainActivity", "Initialized movies count: ${movies.size}")
         return movies
+    }
+
+    private fun writeMoviesToFirebase(movies: List<Movie>) {
+        for (movie in movies) {
+            val movieId = movie.id.toString() // use movie ID as the key
+            movieRef.child(movieId).setValue(movie)
+        }
     }
 }

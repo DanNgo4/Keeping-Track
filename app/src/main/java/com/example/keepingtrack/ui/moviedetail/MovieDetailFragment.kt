@@ -34,7 +34,6 @@ class MovieDetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Retrieve and assign the Movie object from arguments
         movie = arguments?.getSerializable(ARG_MOVIE_DETAIL) as? Movie
         // TODO: Use the ViewModel
     }
@@ -47,14 +46,13 @@ class MovieDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.i("Detail Fragment", "onViewCreated")
         super.onViewCreated(view, savedInstanceState)
 
         val movieId= view.findViewById<TextView>(R.id.editMovieId)
         val movieName = view.findViewById<EditText>(R.id.editMovieName)
         val movieYear = view.findViewById<EditText>(R.id.editMovieYear)
         val movieDirector = view.findViewById<EditText>(R.id.editMovieDirector)
-        val movieGenre = view.findViewById<EditText>(R.id.editMovieGenre)
+        val movieGenre = view.findViewById<TextView>(R.id.editMovieGenre)
         val ratingBar = view.findViewById<RatingBar>(R.id.ratingBar)
         val movieRating = view.findViewById<EditText>(R.id.editMovieRating)
         val movieNotes = view.findViewById<EditText>(R.id.editMovieNotes)
@@ -63,26 +61,26 @@ class MovieDetailFragment : Fragment() {
             movieName.setText(it.name)
             movieYear.setText(it.year.toString())
             movieDirector.setText(it.director)
-            movieGenre.setText(getString(it.genre.displayNameId))
+            movieGenre.text = getString(it.genre.displayNameId)
             ratingBar.rating = it.rating
             movieRating.setText(it.rating.toString())
             movieNotes.setText(it.notes ?: "None")
         }
 
-        val btn = view.findViewById<ImageButton>(R.id.editMovieBtn)
+        // editing enabled
+        val editBtn = view.findViewById<ImageButton>(R.id.editMovieBtn)
         var editing = false
-        btn.setOnClickListener {
+        editBtn.setOnClickListener {
             editing = !editing
             movieName.isEnabled = editing
             movieYear.isEnabled = editing
             movieDirector.isEnabled = editing
-            movieGenre.isEnabled = editing
             ratingBar.setIsIndicator(!editing)
             movieRating.isEnabled = editing
             movieNotes.isEnabled = editing
 
             if (editing) {
-                btn.setImageResource(R.drawable.ic_save)
+                editBtn.setImageResource(R.drawable.ic_save)
 
                 movieName.background = resources.getDrawable(android.R.drawable.edit_text, null)
                 movieName.requestFocus()
@@ -90,22 +88,44 @@ class MovieDetailFragment : Fragment() {
                 movieYear.requestFocus()
                 movieDirector.background = resources.getDrawable(android.R.drawable.edit_text, null)
                 movieDirector.requestFocus()
-                movieGenre.background = resources.getDrawable(android.R.drawable.edit_text, null)
-                movieGenre.requestFocus()
                 movieRating.background = resources.getDrawable(android.R.drawable.edit_text, null)
                 movieRating.requestFocus()
                 movieNotes.background = resources.getDrawable(android.R.drawable.edit_text, null)
                 movieNotes.requestFocus()
             } else {
-                btn.setImageResource(R.drawable.ic_edit)
+                editBtn.setImageResource(R.drawable.ic_edit)
 
                 movieName.background = null
                 movieYear.background = null
                 movieDirector.background = null
-                movieGenre.background = null
                 movieRating.background = null
                 movieNotes.background = null
             }
+        }
+
+        // return to previous fragment
+        val backBtn = view.findViewById<ImageButton>(R.id.backBtn)
+        backBtn.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
+        val deleteBtn = view.findViewById<ImageButton>(R.id.deleteBtn2)
+        deleteBtn.setOnClickListener {
+            movie?.let { movie ->
+                // Call ViewModel to delete the movie from the database
+                viewModel.deleteMovie(movie)
+
+                // return to previous fragment
+                requireActivity().supportFragmentManager.popBackStack()
+            }
+        }
+    }
+
+    private fun removeMovie(movie: Movie) {
+        val position = values.indexOf(movie)
+        if (position >= 0) {
+            values.removeAt(position)
+            recyclerView.adapter?.notifyItemRemoved(position)
         }
     }
 }

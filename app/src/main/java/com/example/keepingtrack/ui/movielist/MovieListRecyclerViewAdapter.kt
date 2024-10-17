@@ -10,7 +10,8 @@ import com.example.keepingtrack.databinding.FragmentMovieItemBinding
 
 class MovieListRecyclerViewAdapter(
     private val values: List<Movie>,
-    private val listener: (Movie) -> Unit
+    private val editListener: (Movie) -> Unit,
+    private val deleteListener: (Movie) -> Unit
 ) : RecyclerView.Adapter<MovieListRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,8 +41,11 @@ class MovieListRecyclerViewAdapter(
                 binding.movieRating.text = movie.rating.toString()
                 binding.movieNotes.text = movie.notes ?: "None"
 
-                binding.button.setOnClickListener{
-                    listener(movie)
+                binding.editButton.setOnClickListener{
+                    editListener(movie)
+                }
+                binding.deleteButton.setOnClickListener {
+                    deleteListener(movie)
                 }
             }
         }

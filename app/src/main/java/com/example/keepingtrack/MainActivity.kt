@@ -10,7 +10,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.enum.Genre
 import com.example.keepingtrack.`object`.Constant
+import com.example.keepingtrack.ui.addmovie.AddMovieFragment
 import com.example.keepingtrack.ui.movielist.MovieListFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 
@@ -29,16 +31,36 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Initialise values and write to Firebase
-        val movies = initValues()
-        writeMoviesToFirebase(movies)
+        // initValuesToFirebase()
 
-        val fragment = MovieListFragment.newInstance(movies)
+        val fragment = MovieListFragment.newInstance()
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainerView, fragment)
             .commit()
+
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        bottomNavigationView.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Navigate to the MovieListFragment (Home)
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, MovieListFragment.newInstance())
+                        .commit()
+                    true
+                }
+                R.id.nav_add_movie -> {
+                    // Navigate to the AddMovieFragment
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, AddMovieFragment())
+                        .commit()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
-    private fun initValues(): List<Movie> {
+    private fun initValuesToFirebase() {
         val movies = mutableListOf<Movie>()
 
         movies.add(Movie(1, "The Gentlemen", 2019, "Guy Ritchie", 7.8f, Genre.ACTION, null))
@@ -60,10 +82,6 @@ class MainActivity : AppCompatActivity() {
         movies.add(Movie(17, "The Notebook", 2004, "Nick Cassavetes", 7.8f, Genre.ROMANCE, "A classic love story"))
         movies.add(Movie(18, "Edge of Tomorrow", 2014, "Doug Liman", 7.9f, Genre.ACTION, "A soldier relives a day in an alien war"))
 
-        return movies
-    }
-
-    private fun writeMoviesToFirebase(movies: List<Movie>) {
         for (movie in movies) {
             val movieId = movie.id.toString() // use movie ID as the key
             movieRef.child(movieId).setValue(movie)

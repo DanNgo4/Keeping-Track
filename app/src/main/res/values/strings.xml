@@ -5,7 +5,6 @@
     <string name="movie_name">The Gentlemen</string>
     <string name="movie_year">(2019)</string>
     <string name="genre">Genre:</string>
-    <string name="movie_genre">Action</string>
     <string name="director">Director:</string>
     <string name="movie_director">Guy Ritchie</string>
     <string name="rating">Rating:</string>
@@ -13,18 +12,12 @@
     <string name="notes">Notes:</string>
     <string name="movie_notes">None</string>
 
-    <string name="edit_movie_id">1.</string>
-    <string name="edit_movie_name">The Gentlemen</string>
     <string name="edit_year">Published Year:</string>
     <string name="edit_movie_year">2019</string>
-    <string name="edit_genre">Genre:</string>
-    <string name="edit_movie_genre">Action</string>
-    <string name="edit_director">Director:</string>
-    <string name="edit_movie_director">Guy Ritchie</string>
-    <string name="edit_rating">Rating:</string>
-    <string name="edit_movie_rating">7.8</string>
-    <string name="edit_notes">Notes:</string>
-    <string name="edit_movie_notes">None</string>
+
+    <string name="add_movie">Add A New Movie</string>
+    <string name="add_name">Movie Name:</string>
+    <string name="add_movie_btn">Add Movie</string>
 
     <string name="genre_none">Unknown</string>
     <string name="genre_romance">Romance</string>
@@ -34,4 +27,16 @@
     <string name="genre_scifi">Science Fiction</string>
     <string name="genre_comedy">Comedy</string>
     <string name="genre_animation">Animation</string>
+
+    // String array for genre spinner (dropdown)
+    <string-array name="genres_array">
+        <item>@string/genre_none</item>
+        <item>@string/genre_romance</item>
+        <item>@string/genre_drama</item>
+        <item>@string/genre_action</item>
+        <item>@string/genre_horror</item>
+        <item>@string/genre_scifi</item>
+        <item>@string/genre_comedy</item>
+        <item>@string/genre_animation</item>
+    </string-array>
 </resources>

@@ -1,6 +1,5 @@
 package com.example.keepingtrack.ui.moviedetail
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,15 +23,13 @@ class MovieDetailViewModel : ViewModel() {
 
     fun deleteMovie(movie: Movie) {
         // Remove the movie from Firebase
-        movieRef.child(movie.id.toString()).removeValue()
+        movieRef.child(movie.id.toString())
+            .removeValue()
             .addOnCompleteListener {
                 if (it.isSuccessful) {
                     // Notify observers that the movie was deleted
                     _deletedMovie.value = movie
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e("MovieDetailViewModel", "Failed to delete movie ${movie.name}: ${e.message}")
             }
     }
 

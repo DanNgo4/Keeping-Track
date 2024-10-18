@@ -1,8 +1,6 @@
 package com.example.keepingtrack
 
 import android.os.Bundle
-import android.text.TextUtils.replace
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -33,25 +31,25 @@ class MainActivity : AppCompatActivity() {
         // Initialise values and write to Firebase
         // initValuesToFirebase()
 
-        val fragment = MovieListFragment.newInstance()
+        // Open Movie List Fragment by default
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView, fragment)
+            .replace(R.id.fragmentContainerView, MovieListFragment.newInstance())
             .commit()
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // Navigate to the MovieListFragment (Home)
+                R.id.nav_home -> { // Navigate to the MovieListFragment (Home)
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainerView, MovieListFragment.newInstance())
+                        .addToBackStack(null)
                         .commit()
                     true
                 }
-                R.id.nav_add_movie -> {
-                    // Navigate to the AddMovieFragment
+                R.id.nav_add_movie -> { // Navigate to the AddMovieFragment
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainerView, AddMovieFragment())
+                        .addToBackStack(null)
                         .commit()
                     true
                 }

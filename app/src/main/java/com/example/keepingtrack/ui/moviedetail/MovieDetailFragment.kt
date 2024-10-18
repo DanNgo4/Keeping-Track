@@ -12,15 +12,19 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.RatingBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import com.example.keepingtrack.R
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.`object`.Constant
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 
 class MovieDetailFragment : Fragment() {
     private var movie: Movie? = null
+    private var originalMovie: Movie? = null
     private val viewModel: MovieDetailViewModel by activityViewModels()
     private val database = Firebase.database
     private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
@@ -53,7 +57,10 @@ class MovieDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val movieId= view.findViewById<TextView>(R.id.editMovieId)
+        // Save the original movie state for "Undo" functionality
+        originalMovie = movie?.copy()
+
+        val movieId = view.findViewById<TextView>(R.id.editMovieId)
         val movieName = view.findViewById<EditText>(R.id.editMovieName)
         val movieYear = view.findViewById<EditText>(R.id.editMovieYear)
         val movieDirector = view.findViewById<EditText>(R.id.editMovieDirector)
@@ -72,6 +79,12 @@ class MovieDetailFragment : Fragment() {
             movieNotes.setText(it.notes ?: "None")
         }
 
+        // return to previous fragment
+        val backBtn = view.findViewById<ImageButton>(R.id.backBtn)
+        backBtn.setOnClickListener {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
+
         // editing enabled
         val editBtn = view.findViewById<ImageButton>(R.id.editMovieBtn)
         var editing = false
@@ -81,25 +94,57 @@ class MovieDetailFragment : Fragment() {
 
             if (!editing) {
                 saveChanges(movie, movieName, movieYear, movieDirector, ratingBar, movieNotes)
-            }
-        }
 
-        // return to previous fragment
-        val backBtn = view.findViewById<ImageButton>(R.id.backBtn)
-        backBtn.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
+                val rootView = requireView().rootView
+                if (rootView != null) {
+                    val snackbar = Snackbar.make(rootView, "Changes saved", Snackbar.LENGTH_LONG)
+                    snackbar.setAction("Undo") {
+                        // Revert the movie to its original state if "Undo" is pressed
+                        originalMovie?.let { originalMovie ->
+                            // revert to the original movie
+                            movieName.setText(originalMovie.name)
+                            movieYear.setText(originalMovie.year.toString())
+                            movieDirector.setText(originalMovie.director)
+                            ratingBar.rating = originalMovie.rating
+                            movieNotes.setText(originalMovie.notes ?: "None")
+
+                            saveChanges(originalMovie, movieName, movieYear, movieDirector, ratingBar, movieNotes)
+
+                            Toast.makeText(requireContext(), "Changes Undone", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    snackbar.show()
+                }
+            }
         }
 
         // delete movie
         val deleteBtn = view.findViewById<ImageButton>(R.id.deleteBtn2)
         deleteBtn.setOnClickListener {
-            movie?.let { movie ->
-                // Call ViewModel to delete the movie from the database
-                viewModel.deleteMovie(movie)
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Delete Movie")
+            builder.setMessage("Confirm delete ${movie?.name} (${movie?.year})")
 
-                // return to previous fragment
-                requireActivity().supportFragmentManager.popBackStack()
+            builder.setPositiveButton("Yes") { dialog, _ ->
+                movie?.let { movie ->
+                    // Call ViewModel to delete the movie from the database
+                    viewModel.deleteMovie(movie)
+
+                    // return to previous fragment
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+
+                dialog.dismiss()
+
+                Toast.makeText(requireContext(), "Deleted ${movie?.name} (${movie?.year}).", Toast.LENGTH_SHORT).show()
             }
+
+            builder.setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+            val alertDialog = builder.create()
+            alertDialog.show()
         }
     }
 
@@ -151,7 +196,7 @@ class MovieDetailFragment : Fragment() {
             movieRef.child(it.id.toString())
                 .setValue(updatedMovie)
                 .addOnSuccessListener {
-                    // Optionally update the UI (RecyclerView) here by notifying the ViewModel
+                    // Update the UI (RecyclerView) by notifying the ViewModel
                     viewModel.updateMovie(updatedMovie)
                 }
         }

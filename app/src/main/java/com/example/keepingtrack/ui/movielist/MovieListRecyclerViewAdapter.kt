@@ -1,7 +1,9 @@
 package com.example.keepingtrack.ui.movielist
 
+import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat.getString
 
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +46,7 @@ class MovieListRecyclerViewAdapter(
                 binding.editButton.setOnClickListener{
                     editListener(movie)
                 }
+
                 binding.deleteButton.setOnClickListener {
                     deleteListener(movie)
                 }

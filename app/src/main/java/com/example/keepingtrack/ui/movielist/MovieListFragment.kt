@@ -1,5 +1,6 @@
 package com.example.keepingtrack.ui.movielist
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.text.TextUtils.replace
 import android.util.Log
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import com.example.keepingtrack.R
 import com.example.keepingtrack.data.Movie
@@ -69,7 +71,12 @@ class MovieListFragment() : Fragment() {
 
         // Observe LiveData for updates and deletions from ViewModel
         viewModel.deletedMovie.observe(viewLifecycleOwner) { movie ->
-            deleteMovie(movie)
+            // Directly delete the movie from the list without showing another dialog
+            val position = values.indexOf(movie)
+            if (position >= 0) {
+                values.removeAt(position)
+                recyclerView.adapter?.notifyItemRemoved(position)
+            }
         }
 
         viewModel.updatedMovie.observe(viewLifecycleOwner) { updatedMovie ->
@@ -112,18 +119,35 @@ class MovieListFragment() : Fragment() {
     }
 
     private fun deleteMovie(movie: Movie) {
-        val movieId = movie.id.toString()
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Delete Movie")
+        builder.setMessage("Confirm delete ${movie.name} (${movie.year})?")
 
-        // Remove the movie from Firebase
-        movieRef.child(movieId)
-            .removeValue()
-            .addOnSuccessListener { // Remove the movie from the UI (RecyclerView)
-                val position = values.indexOf(movie)
-                if (position >= 0) {
-                    values.removeAt(position)
-                    recyclerView.adapter?.notifyItemRemoved(position)
+        builder.setPositiveButton("Yes") { dialog, _ ->
+            val movieId = movie.id.toString()
+
+            // Remove the movie from Firebase
+            movieRef.child(movieId)
+                .removeValue()
+                .addOnSuccessListener { // Remove the movie from the UI (RecyclerView)
+                    val position = values.indexOf(movie)
+                    if (position >= 0) {
+                        values.removeAt(position)
+                        recyclerView.adapter?.notifyItemRemoved(position)
+                    }
                 }
-            }
+
+            dialog.dismiss()
+
+            Toast.makeText(requireContext(), "Deleted ${movie.name} (${movie.year}).", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
     }
 
     companion object {

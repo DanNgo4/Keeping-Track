@@ -2,12 +2,15 @@ package com.example.keepingtrack
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.enum.Genre
 import com.example.keepingtrack.`object`.Constant
+import com.example.keepingtrack.ui.SharedViewModel
 import com.example.keepingtrack.ui.addmovie.AddMovieFragment
 import com.example.keepingtrack.ui.movielist.MovieListFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -17,6 +20,7 @@ import com.google.firebase.database.database
 class MainActivity : AppCompatActivity() {
     private val database = Firebase.database
     private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
+    private val sharedViewModel: SharedViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,31 +35,54 @@ class MainActivity : AppCompatActivity() {
         // Initialise values and write to Firebase
         // initValuesToFirebase()
 
-        // Open Movie List Fragment by default
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainerView, MovieListFragment.newInstance())
-            .commit()
+        if (savedInstanceState == null) {
+            loadDefaultFragment()
+        } else {
+            // Restore the current fragment using the saved fragment tag from the ViewModel
+            sharedViewModel.currentFragmentTag?.let { fragmentTag ->
+                val fragment = supportFragmentManager.findFragmentByTag(fragmentTag)
+                fragment?.let {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainerView, it, fragmentTag)
+                        .commit()
+                }
+            }
+        }
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> { // Navigate to the MovieListFragment (Home)
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, MovieListFragment.newInstance())
-                        .addToBackStack(null)
-                        .commit()
+                    replaceFragment(MovieListFragment.newInstance(), Constant.TAG_MOVIE_LIST_FRAGMENT)
                     true
                 }
                 R.id.nav_add_movie -> { // Navigate to the AddMovieFragment
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView, AddMovieFragment())
-                        .addToBackStack(null)
-                        .commit()
+                    replaceFragment(AddMovieFragment.newInstance(), Constant.TAG_ADD_MOVIE_FRAGMENT)
                     true
                 }
                 else -> false
             }
         }
+    }
+
+    private fun loadDefaultFragment() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, MovieListFragment(), Constant.TAG_MOVIE_LIST_FRAGMENT)
+            .commit()
+
+        // Save the current fragment tag in the ViewModel
+        sharedViewModel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
+    }
+
+    // replacing fragment and save it as the current state
+    fun replaceFragment(fragment: Fragment, tag: String) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainerView, fragment, tag)
+            .addToBackStack(null)
+            .commit()
+
+        // Save the current fragment tag in the ViewModel
+        sharedViewModel.currentFragmentTag = tag
     }
 
     private fun initValuesToFirebase() {

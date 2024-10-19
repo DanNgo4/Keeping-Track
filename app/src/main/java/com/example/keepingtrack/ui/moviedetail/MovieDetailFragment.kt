@@ -1,13 +1,10 @@
 package com.example.keepingtrack.ui.moviedetail
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.RatingBar
@@ -18,6 +15,7 @@ import androidx.fragment.app.activityViewModels
 import com.example.keepingtrack.R
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.`object`.Constant
+import com.example.keepingtrack.ui.SharedViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
@@ -26,11 +24,12 @@ class MovieDetailFragment : Fragment() {
     private var movie: Movie? = null
     private var originalMovie: Movie? = null
     private val viewModel: MovieDetailViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
     private val database = Firebase.database
     private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
 
     companion object {
-        private const val ARG_MOVIE_DETAIL = "movie_detail"
+        private const val ARG_MOVIE_DETAIL = "MovieDetail"
 
         fun newInstance(movie: Movie) : MovieDetailFragment {
             return MovieDetailFragment().apply {
@@ -44,7 +43,6 @@ class MovieDetailFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         movie = arguments?.getSerializable(ARG_MOVIE_DETAIL) as? Movie
-        // TODO: Use the ViewModel
     }
 
     override fun onCreateView(
@@ -82,6 +80,9 @@ class MovieDetailFragment : Fragment() {
         // return to previous fragment
         val backBtn = view.findViewById<ImageButton>(R.id.backBtn)
         backBtn.setOnClickListener {
+            // Set the fragment tag back to MovieListFragment in the shared ViewModel
+            sharedViewModel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
+
             requireActivity().supportFragmentManager.popBackStack()
         }
 
@@ -129,6 +130,9 @@ class MovieDetailFragment : Fragment() {
                 movie?.let { movie ->
                     // Call ViewModel to delete the movie from the database
                     viewModel.deleteMovie(movie)
+
+                    // Set the fragment tag back to MovieListFragment in the shared ViewModel
+                    sharedViewModel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
 
                     // return to previous fragment
                     requireActivity().supportFragmentManager.popBackStack()

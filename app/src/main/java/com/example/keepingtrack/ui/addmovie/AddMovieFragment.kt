@@ -122,6 +122,8 @@ class AddMovieFragment : Fragment() {
                 // Navigate back to the movie list or show a success message
                 requireActivity().supportFragmentManager.popBackStack()
             }
+
+        Toast.makeText(requireContext(), "${movie.name} (${movie.year}) added!", Toast.LENGTH_SHORT).show()
     }
 
     companion object {

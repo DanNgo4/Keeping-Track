@@ -25,8 +25,7 @@ class MovieDetailFragment : Fragment() {
     private var originalMovie: Movie? = null
     private val viewModel: MovieDetailViewModel by activityViewModels()
     private val sharedViewModel: SharedViewModel by activityViewModels()
-    private val database = Firebase.database
-    private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
+    private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
 
     companion object {
         private const val ARG_MOVIE_DETAIL = "MovieDetail"
@@ -165,12 +164,16 @@ class MovieDetailFragment : Fragment() {
         movieYear.isEnabled = editing
         movieDirector.isEnabled = editing
         ratingBar.setIsIndicator(!editing)
-        movieRating.isEnabled = editing
         movieNotes.isEnabled = editing
 
         val editBtn = requireView().findViewById<ImageButton>(R.id.editMovieBtn)
         if (editing) {
             editBtn.setImageResource(R.drawable.ic_save)
+
+            // Listen for RatingBar changes and update movieRating EditText accordingly
+            ratingBar.setOnRatingBarChangeListener { _, rating, _ ->
+                movieRating.setText(rating.toString()) // Update movieRating when RatingBar changes
+            }
         } else {
             editBtn.setImageResource(R.drawable.ic_edit)
         }
@@ -191,7 +194,7 @@ class MovieDetailFragment : Fragment() {
                 name = movieName.text.toString(),
                 year = movieYear.text.toString().toIntOrNull() ?: it.year,
                 director = movieDirector.text.toString(),
-                genre = it.genre, // assuming genre doesn't change in this form
+                genre = it.genre,
                 rating = ratingBar.rating,
                 notes = movieNotes.text.toString()
             )

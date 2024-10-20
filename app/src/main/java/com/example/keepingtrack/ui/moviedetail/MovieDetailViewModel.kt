@@ -18,8 +18,7 @@ class MovieDetailViewModel : ViewModel() {
     private val _updatedMovie = MutableLiveData<Movie>()
     val updatedMovie: LiveData<Movie> = _updatedMovie
 
-    private val database = Firebase.database
-    private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
+    private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
 
     fun deleteMovie(movie: Movie) {
         // Remove the movie from Firebase

@@ -27,8 +27,7 @@ class MovieListFragment() : Fragment() {
     private lateinit var values: MutableList<Movie>
     private lateinit var recyclerView: RecyclerView
     private val viewModel: MovieDetailViewModel by activityViewModels()
-    private val database = Firebase.database
-    private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
+    private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +95,7 @@ class MovieListFragment() : Fragment() {
         })
     }
 
+    // Open an individual movie for further details and edit
     private fun showDetail(movie: Movie) {
         val fragment = MovieDetailFragment.newInstance(movie)
 

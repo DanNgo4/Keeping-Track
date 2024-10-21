@@ -17,15 +17,11 @@ import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.`object`.Constant
 import com.example.keepingtrack.ui.SharedViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.Firebase
-import com.google.firebase.database.database
 
 class MovieDetailFragment : Fragment() {
     private var movie: Movie? = null
     private var originalMovie: Movie? = null
-    private val viewModel: MovieDetailViewModel by activityViewModels()
-    private val sharedViewModel: SharedViewModel by activityViewModels()
-    private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
+    private val viewmodel: SharedViewModel by activityViewModels()
 
     companion object {
         private const val ARG_MOVIE_DETAIL = "MovieDetail"
@@ -54,6 +50,8 @@ class MovieDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewmodel.currentFragmentTag = Constant.TAG_MOVIE_DETAIL_FRAGMENT
+
         // Save the original movie state for "Undo" functionality
         originalMovie = movie?.copy()
 
@@ -80,7 +78,7 @@ class MovieDetailFragment : Fragment() {
         val backBtn = view.findViewById<ImageButton>(R.id.backBtn)
         backBtn.setOnClickListener {
             // Set the fragment tag back to MovieListFragment in the shared ViewModel
-            sharedViewModel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
+            viewmodel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
 
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -128,10 +126,10 @@ class MovieDetailFragment : Fragment() {
             builder.setPositiveButton("Yes") { dialog, _ ->
                 movie?.let { movie ->
                     // Call ViewModel to delete the movie from the database
-                    viewModel.deleteMovie(movie)
+                    viewmodel.deleteMovie(movie)
 
                     // Set the fragment tag back to MovieListFragment in the shared ViewModel
-                    sharedViewModel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
+                    viewmodel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
 
                     // return to previous fragment
                     requireActivity().supportFragmentManager.popBackStack()
@@ -170,9 +168,8 @@ class MovieDetailFragment : Fragment() {
         if (editing) {
             editBtn.setImageResource(R.drawable.ic_save)
 
-            // Listen for RatingBar changes and update movieRating EditText accordingly
             ratingBar.setOnRatingBarChangeListener { _, rating, _ ->
-                movieRating.setText(rating.toString()) // Update movieRating when RatingBar changes
+                movieRating.setText(rating.toString()) // Update movieRating text when RatingBar changes
             }
         } else {
             editBtn.setImageResource(R.drawable.ic_edit)
@@ -199,13 +196,7 @@ class MovieDetailFragment : Fragment() {
                 notes = movieNotes.text.toString()
             )
 
-            // Update movie in Firebase
-            movieRef.child(it.id.toString())
-                .setValue(updatedMovie)
-                .addOnSuccessListener {
-                    // Update the UI (RecyclerView) by notifying the ViewModel
-                    viewModel.updateMovie(updatedMovie)
-                }
+            viewmodel.updateMovie(updatedMovie)
         }
     }
 }

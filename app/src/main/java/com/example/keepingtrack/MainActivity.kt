@@ -19,7 +19,7 @@ import com.google.firebase.database.database
 
 class MainActivity : AppCompatActivity() {
     private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
-    private val sharedViewModel: SharedViewModel by viewModels()
+    private val viewmodel: SharedViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             loadDefaultFragment()
         } else {
             // Restore the current fragment using the saved fragment tag from the shared ViewModel
-            sharedViewModel.currentFragmentTag?.let { fragmentTag ->
+            viewmodel.currentFragmentTag?.let { fragmentTag ->
                 val fragment = supportFragmentManager.findFragmentByTag(fragmentTag)
                 fragment?.let {
                     supportFragmentManager.beginTransaction()
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.fragmentContainerView, MovieListFragment(), Constant.TAG_MOVIE_LIST_FRAGMENT)
             .commit()
 
-        sharedViewModel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
+        viewmodel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
     }
 
     // replacing fragment and save it as the current state
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             .addToBackStack(null)
             .commit()
 
-        sharedViewModel.currentFragmentTag = tag
+        viewmodel.currentFragmentTag = tag
     }
 
     private fun initValuesToFirebase() {

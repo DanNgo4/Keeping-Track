@@ -1,6 +1,7 @@
 package com.example.keepingtrack.ui.addmovie
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +13,12 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import com.example.keepingtrack.R
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.enum.Genre
 import com.example.keepingtrack.`object`.Constant
+import com.example.keepingtrack.ui.SharedViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -26,10 +29,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AddMovieFragment : Fragment() {
-    private val database = Firebase.database
-    private val movieRef = database.getReference(Constant.PATH_MOVIES_REFERENCE)
+    private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
     private lateinit var selectedGenre: Genre
     private var newMovieId: Int = 1
+    private val viewmodel: SharedViewModel by activityViewModels()
     private var useBackgroundThread = false // Toggle to switch variants
 
     override fun onCreateView(
@@ -62,6 +65,9 @@ class AddMovieFragment : Fragment() {
         // return to previous fragment
         val backBtn = view.findViewById<ImageButton>(R.id.backBtn2)
         backBtn.setOnClickListener {
+            // Set the fragment tag back to MovieListFragment in the shared ViewModel
+            viewmodel.currentFragmentTag = Constant.TAG_MOVIE_LIST_FRAGMENT
+
             requireActivity().supportFragmentManager.popBackStack()
         }
 
@@ -132,21 +138,18 @@ class AddMovieFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(requireContext(), "Failed to fetch last movie ID: ${error.message}", Toast.LENGTH_SHORT).show()
+                Log.e(Constant.TAG_ADD_MOVIE_FRAGMENT, "Failed to fetch last movie ID: ${error.message}")
             }
         })
     }
 
     // using Main Thread
     private fun addMovie(movie: Movie) {
-        movieRef.child(movie.id.toString())
-            .setValue(movie)
-            .addOnSuccessListener {
-                // Navigate back to the movie list and show a success message
-                requireActivity().supportFragmentManager.popBackStack()
-            }
+        viewmodel.updateMovie(movie) {
+            requireActivity().supportFragmentManager.popBackStack()
 
-        Toast.makeText(requireContext(), "${movie.name} (${movie.year}) added!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "${movie.name} (${movie.year}) added!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Using Background Thread
@@ -169,7 +172,7 @@ class AddMovieFragment : Fragment() {
 
                 override fun onCancelled(error: DatabaseError) {
                     CoroutineScope(Dispatchers.Main).launch {
-                        Toast.makeText(requireContext(), "Failed to fetch last movie ID: ${error.message}", Toast.LENGTH_SHORT).show()
+                        Log.e(Constant.TAG_ADD_MOVIE_FRAGMENT, "Failed to fetch last movie ID: ${error.message}")
                     }
                 }
             })
@@ -179,16 +182,14 @@ class AddMovieFragment : Fragment() {
     // Using Background Thread
     private fun addMovieInBackground(movie: Movie) {
         CoroutineScope(Dispatchers.IO).launch {
-            movieRef.child(movie.id.toString())
-                .setValue(movie)
-                .addOnSuccessListener {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        // Navigate back to the movie list and show a success message
-                        requireActivity().supportFragmentManager.popBackStack()
+            viewmodel.updateMovie(movie) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    // Navigate back to the movie list on success
+                    requireActivity().supportFragmentManager.popBackStack()
 
-                        Toast.makeText(requireContext(), "${movie.name} (${movie.year}) added in background!", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(requireContext(), "${movie.name} (${movie.year}) added in background!", Toast.LENGTH_SHORT).show()
                 }
+            }
         }
     }
 

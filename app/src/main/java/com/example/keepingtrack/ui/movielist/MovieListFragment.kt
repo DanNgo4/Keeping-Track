@@ -15,8 +15,8 @@ import com.example.keepingtrack.MainActivity
 import com.example.keepingtrack.R
 import com.example.keepingtrack.data.Movie
 import com.example.keepingtrack.`object`.Constant
+import com.example.keepingtrack.ui.SharedViewModel
 import com.example.keepingtrack.ui.moviedetail.MovieDetailFragment
-import com.example.keepingtrack.ui.moviedetail.MovieDetailViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -26,7 +26,7 @@ import com.google.firebase.database.database
 class MovieListFragment() : Fragment() {
     private lateinit var values: MutableList<Movie>
     private lateinit var recyclerView: RecyclerView
-    private val viewModel: MovieDetailViewModel by activityViewModels()
+    private val viewModel: SharedViewModel by activityViewModels()
     private val movieRef = Firebase.database.getReference(Constant.PATH_MOVIES_REFERENCE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,10 +58,10 @@ class MovieListFragment() : Fragment() {
 
         // Observe LiveData for updates and deletions from ViewModel
         viewModel.deletedMovie.observe(viewLifecycleOwner) { movie ->
-            val position = values.indexOf(movie)
-            if (position >= 0) {
-                values.removeAt(position)
-                recyclerView.adapter?.notifyItemRemoved(position)
+            val index = values.indexOf(movie)
+            if (index >= 0) {
+                values.removeAt(index)
+                recyclerView.adapter?.notifyItemRemoved(index)
             }
         }
 
@@ -73,6 +73,7 @@ class MovieListFragment() : Fragment() {
             }
         }
 
+        // Initialise data for UI on create view
         fetchMoviesFromFirebase()
     }
 
